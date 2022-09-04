@@ -24,7 +24,10 @@ public:
     Sailboat();
 
     // enabled
-    bool sail_enabled() const { return enable > 0;}
+    bool sail_enabled() const
+    {
+        return enable > 0;
+    }
 
     // true if sailboat navigation (aka tacking) is enabled
     bool tack_enabled() const;
@@ -83,7 +86,10 @@ public:
     static const struct AP_Param::GroupInfo var_info[];
 
     // return sailboat loiter radius
-    float get_loiter_radius() const {return loit_radius;}
+    float get_loiter_radius() const
+    {
+        return loit_radius;
+    }
 
 private:
 

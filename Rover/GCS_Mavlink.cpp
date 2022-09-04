@@ -584,11 +584,13 @@ MAV_RESULT GCS_MAVLINK_Rover::_handle_command_preflight_calibration(const mavlin
     return GCS_MAVLINK::_handle_command_preflight_calibration(packet);
 }
 
-bool GCS_MAVLINK_Rover::set_home_to_current_location(bool _lock) {
+bool GCS_MAVLINK_Rover::set_home_to_current_location(bool _lock)
+{
     return rover.set_home_to_current_location(_lock);
 }
 
-bool GCS_MAVLINK_Rover::set_home(const Location& loc, bool _lock) {
+bool GCS_MAVLINK_Rover::set_home(const Location& loc, bool _lock)
+{
     return rover.set_home(loc, _lock);
 }
 
@@ -646,8 +648,7 @@ MAV_RESULT GCS_MAVLINK_Rover::handle_command_long_packet(const mavlink_command_l
         rover.control_mode->set_reversed(is_equal(packet.param1,1.0f));
         return MAV_RESULT_ACCEPTED;
 
-    case MAV_CMD_NAV_SET_YAW_SPEED:
-    {
+    case MAV_CMD_NAV_SET_YAW_SPEED: {
         // param1 : yaw angle to adjust direction by in centidegress
         // param2 : Speed - normalized to 0 .. 1
         // param3 : 0 = absolute, 1 = relative
@@ -851,7 +852,7 @@ void GCS_MAVLINK_Rover::handle_set_position_target_local_ned(const mavlink_messa
             // add offset to current location
             target_loc.offset(ne_x, ne_y);
         }
-            break;
+        break;
 
         case MAV_FRAME_LOCAL_OFFSET_NED:
             // add offset to current location
@@ -1057,7 +1058,7 @@ uint8_t GCS_MAVLINK_Rover::high_latency_tgt_heading() const
     }
     return 0;
 }
-    
+
 uint16_t GCS_MAVLINK_Rover::high_latency_tgt_dist() const
 {
     const Mode *control_mode = rover.control_mode;

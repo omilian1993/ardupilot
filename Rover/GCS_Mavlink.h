@@ -22,7 +22,10 @@ protected:
 
     void send_position_target_global_int() override;
 
-    bool persist_streamrates() const override { return true; }
+    bool persist_streamrates() const override
+    {
+        return true;
+    }
 
     bool set_home_to_current_location(bool lock) override;
     bool set_home(const Location& loc, bool lock) override;

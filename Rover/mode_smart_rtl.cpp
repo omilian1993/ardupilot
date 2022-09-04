@@ -36,62 +36,62 @@ bool ModeSmartRTL::_enter()
 void ModeSmartRTL::update()
 {
     switch (smart_rtl_state) {
-        case SmartRTL_WaitForPathCleanup:
-            // check if return path is computed and if yes, begin journey home
-            if (g2.smart_rtl.request_thorough_cleanup()) {
-                smart_rtl_state = SmartRTL_PathFollow;
-                _load_point = true;
+    case SmartRTL_WaitForPathCleanup:
+        // check if return path is computed and if yes, begin journey home
+        if (g2.smart_rtl.request_thorough_cleanup()) {
+            smart_rtl_state = SmartRTL_PathFollow;
+            _load_point = true;
+        }
+        // Note: this may lead to an unnecessary 20ms slow down of the vehicle (but it is unlikely)
+        stop_vehicle();
+        break;
+
+    case SmartRTL_PathFollow:
+        // load point if required
+        if (_load_point) {
+            Vector3f next_point;
+            if (!g2.smart_rtl.pop_point(next_point)) {
+                // if not more points, we have reached home
+                gcs().send_text(MAV_SEVERITY_INFO, "Reached destination");
+                smart_rtl_state = SmartRTL_StopAtHome;
+                break;
             }
-            // Note: this may lead to an unnecessary 20ms slow down of the vehicle (but it is unlikely)
+            _load_point = false;
+            // set target destination to new point
+            if (!g2.wp_nav.set_desired_location_NED(next_point)) {
+                // this failure should never happen but we add it just in case
+                gcs().send_text(MAV_SEVERITY_INFO, "SmartRTL: failed to set destination");
+                smart_rtl_state = SmartRTL_Failure;
+            }
+        }
+        // update navigation controller
+        navigate_to_waypoint();
+
+        // check if we've reached the next point
+        if (g2.wp_nav.reached_destination()) {
+            _load_point = true;
+        }
+        break;
+
+    case SmartRTL_StopAtHome:
+    case SmartRTL_Failure:
+        _reached_destination = true;
+        // we have reached the destination
+        // boats loiters, rovers stop
+        if (!rover.is_boat()) {
             stop_vehicle();
-            break;
-
-        case SmartRTL_PathFollow:
-            // load point if required
-            if (_load_point) {
-                Vector3f next_point;
-                if (!g2.smart_rtl.pop_point(next_point)) {
-                    // if not more points, we have reached home
-                    gcs().send_text(MAV_SEVERITY_INFO, "Reached destination");
-                    smart_rtl_state = SmartRTL_StopAtHome;
-                    break;
-                }
-                _load_point = false;
-                // set target destination to new point
-                if (!g2.wp_nav.set_desired_location_NED(next_point)) {
-                    // this failure should never happen but we add it just in case
-                    gcs().send_text(MAV_SEVERITY_INFO, "SmartRTL: failed to set destination");
-                    smart_rtl_state = SmartRTL_Failure;
-                }
+        } else {
+            // if not loitering yet, start loitering
+            if (!_loitering) {
+                _loitering = rover.mode_loiter.enter();
             }
-            // update navigation controller
-            navigate_to_waypoint();
-
-            // check if we've reached the next point
-            if (g2.wp_nav.reached_destination()) {
-                _load_point = true;
-            }
-            break;
-
-        case SmartRTL_StopAtHome:
-        case SmartRTL_Failure:
-            _reached_destination = true;
-            // we have reached the destination
-            // boats loiters, rovers stop
-            if (!rover.is_boat()) {
-               stop_vehicle();
+            if (_loitering) {
+                rover.mode_loiter.update();
             } else {
-                // if not loitering yet, start loitering
-                if (!_loitering) {
-                    _loitering = rover.mode_loiter.enter();
-                }
-                if (_loitering) {
-                    rover.mode_loiter.update();
-                } else {
-                    stop_vehicle();
-               }
+                stop_vehicle();
             }
-            break;
+        }
+        break;
     }
 }
 

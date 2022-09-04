@@ -31,25 +31,25 @@ void Rover::motor_test_output()
         bool test_result = false;
         // calculate  based on throttle type
         switch (motor_test_throttle_type) {
-            case MOTOR_TEST_THROTTLE_PERCENT:
-                test_result = g2.motors.output_test_pct(motor_test_instance, motor_test_throttle_value);
-                break;
+        case MOTOR_TEST_THROTTLE_PERCENT:
+            test_result = g2.motors.output_test_pct(motor_test_instance, motor_test_throttle_value);
+            break;
 
-            case MOTOR_TEST_THROTTLE_PWM:
-                test_result = g2.motors.output_test_pwm(motor_test_instance, motor_test_throttle_value);
-                break;
+        case MOTOR_TEST_THROTTLE_PWM:
+            test_result = g2.motors.output_test_pwm(motor_test_instance, motor_test_throttle_value);
+            break;
 
-            case MOTOR_TEST_THROTTLE_PILOT:
-                if (motor_test_instance == AP_MotorsUGV::MOTOR_TEST_STEERING) {
-                    test_result = g2.motors.output_test_pct(motor_test_instance, channel_steer->norm_input_dz() * 100.0f);
-                } else {
-                    test_result = g2.motors.output_test_pct(motor_test_instance, channel_throttle->get_control_in());
-                }
-                break;
+        case MOTOR_TEST_THROTTLE_PILOT:
+            if (motor_test_instance == AP_MotorsUGV::MOTOR_TEST_STEERING) {
+                test_result = g2.motors.output_test_pct(motor_test_instance, channel_steer->norm_input_dz() * 100.0f);
+            } else {
+                test_result = g2.motors.output_test_pct(motor_test_instance, channel_throttle->get_control_in());
+            }
+            break;
 
-            default:
-                // do nothing
-                return;
+        default:
+            // do nothing
+            return;
         }
         // stop motor test on failure
         if (!test_result) {

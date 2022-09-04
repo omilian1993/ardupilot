@@ -67,36 +67,35 @@ void Mode::get_pilot_input(float &steering_out, float &throttle_out)
     }
 
     // apply RC skid steer mixing
-    switch ((enum pilot_steer_type_t)rover.g.pilot_steer_type.get())
-    {
-        case PILOT_STEER_TYPE_DEFAULT:
-        case PILOT_STEER_TYPE_DIR_REVERSED_WHEN_REVERSING:
-        default: {
-            // by default regular and skid-steering vehicles reverse their rotation direction when backing up
-            throttle_out = rover.channel_throttle->get_control_in();
-            const float steering_dir = is_negative(throttle_out) ? -1 : 1;
-            steering_out = steering_dir * rover.channel_steer->get_control_in();
-            break;
-        }
+    switch ((enum pilot_steer_type_t)rover.g.pilot_steer_type.get()) {
+    case PILOT_STEER_TYPE_DEFAULT:
+    case PILOT_STEER_TYPE_DIR_REVERSED_WHEN_REVERSING:
+    default: {
+        // by default regular and skid-steering vehicles reverse their rotation direction when backing up
+        throttle_out = rover.channel_throttle->get_control_in();
+        const float steering_dir = is_negative(throttle_out) ? -1 : 1;
+        steering_out = steering_dir * rover.channel_steer->get_control_in();
+        break;
+    }
 
-        case PILOT_STEER_TYPE_TWO_PADDLES: {
-            // convert the two radio_in values from skid steering values
-            // left paddle from steering input channel, right paddle from throttle input channel
-            // steering = left-paddle - right-paddle
-            // throttle = average(left-paddle, right-paddle)
-            const float left_paddle = rover.channel_steer->norm_input_dz();
-            const float right_paddle = rover.channel_throttle->norm_input_dz();
+    case PILOT_STEER_TYPE_TWO_PADDLES: {
+        // convert the two radio_in values from skid steering values
+        // left paddle from steering input channel, right paddle from throttle input channel
+        // steering = left-paddle - right-paddle
+        // throttle = average(left-paddle, right-paddle)
+        const float left_paddle = rover.channel_steer->norm_input_dz();
+        const float right_paddle = rover.channel_throttle->norm_input_dz();
 
-            throttle_out = 0.5f * (left_paddle + right_paddle) * 100.0f;
-            steering_out = (left_paddle - right_paddle) * 0.5f * 4500.0f;
-            break;
-        }
+        throttle_out = 0.5f * (left_paddle + right_paddle) * 100.0f;
+        steering_out = (left_paddle - right_paddle) * 0.5f * 4500.0f;
+        break;
+    }
 
-        case PILOT_STEER_TYPE_DIR_UNCHANGED_WHEN_REVERSING: {
-            throttle_out = rover.channel_throttle->get_control_in();
-            steering_out = rover.channel_steer->get_control_in();
-            break;
-        }
+    case PILOT_STEER_TYPE_DIR_UNCHANGED_WHEN_REVERSING: {
+        throttle_out = rover.channel_throttle->get_control_in();
+        steering_out = rover.channel_steer->get_control_in();
+        break;
+    }
     }
 }
 
@@ -445,8 +444,22 @@ void Mode::navigate_to_waypoint()
             desired_turn_rate_rads = 0.0f;
         }
 
-        // call turn rate steering controller
-        calc_steering_from_turn_rate(desired_turn_rate_rads);
+        if (g.nav_controller.get()<2) {
+            // call turn rate steering controller
+            calc_steering_from_turn_rate(desired_turn_rate_rads);
+        } else {
+            //P-D controllera
+            g2.attitude_control.get_steering_rate_pid().kP(10.0f);
+            g2.attitude_control.get_steering_rate_pid().kD(1.0f);
+            float desired_heading=radians(wrap_360_cd(desired_heading_cd)*0.01f);
+            // calculate heading error (in radians)
+            const float yaw_error = wrap_PI(desired_heading - ahrs.yaw);
+            // Calculate the desired turn rate (in radians) from the angle error (also in radians)
+
+            float desired_rate =yaw_error*g2.attitude_control.get_steering_rate_pid().kP();//
+            const float steering_out= (desired_rate - ahrs.get_yaw_rate_earth()*g2.attitude_control.get_steering_rate_pid().kD());
+            g2.motors.set_steering(steering_out * 4500.0f);
+        }
     }
 }
 
@@ -456,9 +469,9 @@ void Mode::calc_steering_from_turn_rate(float turn_rate)
 {
     // calculate and send final steering command to motor library
     const float steering_out = attitude_control.get_steering_out_rate(turn_rate,
-                                                                      g2.motors.limit.steer_left,
-                                                                      g2.motors.limit.steer_right,
-                                                                      rover.G_Dt);
+                               g2.motors.limit.steer_left,
+                               g2.motors.limit.steer_right,
+                               rover.G_Dt);
     g2.motors.set_steering(steering_out * 4500.0f);
 }
 
@@ -472,9 +485,9 @@ void Mode::calc_steering_from_lateral_acceleration(float lat_accel, bool reverse
 
     // send final steering command to motor library
     const float steering_out = attitude_control.get_steering_out_lat_accel(lat_accel,
-                                                                           g2.motors.limit.steer_left,
-                                                                           g2.motors.limit.steer_right,
-                                                                           rover.G_Dt);
+                               g2.motors.limit.steer_left,
+                               g2.motors.limit.steer_right,
+                               rover.G_Dt);
     set_steering(steering_out * 4500.0f);
 }
 
@@ -484,10 +497,10 @@ void Mode::calc_steering_to_heading(float desired_heading_cd, float rate_max_deg
 {
     // call heading controller
     const float steering_out = attitude_control.get_steering_out_heading(radians(desired_heading_cd*0.01f),
-                                                                         radians(rate_max_degs),
-                                                                         g2.motors.limit.steer_left,
-                                                                         g2.motors.limit.steer_right,
-                                                                         rover.G_Dt);
+                               radians(rate_max_degs),
+                               g2.motors.limit.steer_left,
+                               g2.motors.limit.steer_right,
+                               rover.G_Dt);
     set_steering(steering_out * 4500.0f);
 }
 

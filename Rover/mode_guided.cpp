@@ -23,122 +23,117 @@ bool ModeGuided::_enter()
 void ModeGuided::update()
 {
     switch (_guided_mode) {
-        case Guided_WP:
-        {
-            // check if we've reached the destination
-            if (!g2.wp_nav.reached_destination()) {
-                // update navigation controller
-                navigate_to_waypoint();
-            } else {
-                // send notification
-                if (send_notification) {
-                    send_notification = false;
-                    rover.gcs().send_mission_item_reached_message(0);
-                }
+    case Guided_WP: {
+        // check if we've reached the destination
+        if (!g2.wp_nav.reached_destination()) {
+            // update navigation controller
+            navigate_to_waypoint();
+        } else {
+            // send notification
+            if (send_notification) {
+                send_notification = false;
+                rover.gcs().send_mission_item_reached_message(0);
+            }
 
-                // we have reached the destination so stay here
-                if (rover.is_boat()) {
-                    if (!start_loiter()) {
-                        stop_vehicle();
-                    }
-                } else {
+            // we have reached the destination so stay here
+            if (rover.is_boat()) {
+                if (!start_loiter()) {
                     stop_vehicle();
                 }
-                // update distance to destination
-                _distance_to_destination = rover.current_loc.get_distance(g2.wp_nav.get_destination());
-            }
-            break;
-        }
-
-        case Guided_HeadingAndSpeed:
-        {
-            // stop vehicle if target not updated within 3 seconds
-            if (have_attitude_target && (millis() - _des_att_time_ms) > 3000) {
-                gcs().send_text(MAV_SEVERITY_WARNING, "target not received last 3secs, stopping");
-                have_attitude_target = false;
-            }
-            if (have_attitude_target) {
-                // run steering and throttle controllers
-                calc_steering_to_heading(_desired_yaw_cd);
-                calc_throttle(calc_speed_nudge(_desired_speed, is_negative(_desired_speed)), true);
             } else {
-                // we have reached the destination so stay here
-                if (rover.is_boat()) {
-                    if (!start_loiter()) {
-                        stop_vehicle();
-                    }
-                } else {
+                stop_vehicle();
+            }
+            // update distance to destination
+            _distance_to_destination = rover.current_loc.get_distance(g2.wp_nav.get_destination());
+        }
+        break;
+    }
+
+    case Guided_HeadingAndSpeed: {
+        // stop vehicle if target not updated within 3 seconds
+        if (have_attitude_target && (millis() - _des_att_time_ms) > 3000) {
+            gcs().send_text(MAV_SEVERITY_WARNING, "target not received last 3secs, stopping");
+            have_attitude_target = false;
+        }
+        if (have_attitude_target) {
+            // run steering and throttle controllers
+            calc_steering_to_heading(_desired_yaw_cd);
+            calc_throttle(calc_speed_nudge(_desired_speed, is_negative(_desired_speed)), true);
+        } else {
+            // we have reached the destination so stay here
+            if (rover.is_boat()) {
+                if (!start_loiter()) {
                     stop_vehicle();
                 }
-            }
-            break;
-        }
-
-        case Guided_TurnRateAndSpeed:
-        {
-            // stop vehicle if target not updated within 3 seconds
-            if (have_attitude_target && (millis() - _des_att_time_ms) > 3000) {
-                gcs().send_text(MAV_SEVERITY_WARNING, "target not received last 3secs, stopping");
-                have_attitude_target = false;
-            }
-            if (have_attitude_target) {
-                // run steering and throttle controllers
-                float steering_out = attitude_control.get_steering_out_rate(radians(_desired_yaw_rate_cds / 100.0f),
-                                                                            g2.motors.limit.steer_left,
-                                                                            g2.motors.limit.steer_right,
-                                                                            rover.G_Dt);
-                set_steering(steering_out * 4500.0f);
-                calc_throttle(calc_speed_nudge(_desired_speed, is_negative(_desired_speed)), true);
             } else {
-                // we have reached the destination so stay here
-                if (rover.is_boat()) {
-                    if (!start_loiter()) {
-                        stop_vehicle();
-                    }
-                } else {
+                stop_vehicle();
+            }
+        }
+        break;
+    }
+
+    case Guided_TurnRateAndSpeed: {
+        // stop vehicle if target not updated within 3 seconds
+        if (have_attitude_target && (millis() - _des_att_time_ms) > 3000) {
+            gcs().send_text(MAV_SEVERITY_WARNING, "target not received last 3secs, stopping");
+            have_attitude_target = false;
+        }
+        if (have_attitude_target) {
+            // run steering and throttle controllers
+            float steering_out = attitude_control.get_steering_out_rate(radians(_desired_yaw_rate_cds / 100.0f),
+                                 g2.motors.limit.steer_left,
+                                 g2.motors.limit.steer_right,
+                                 rover.G_Dt);
+            set_steering(steering_out * 4500.0f);
+            calc_throttle(calc_speed_nudge(_desired_speed, is_negative(_desired_speed)), true);
+        } else {
+            // we have reached the destination so stay here
+            if (rover.is_boat()) {
+                if (!start_loiter()) {
                     stop_vehicle();
                 }
-            }
-            break;
-        }
-
-        case Guided_Loiter:
-        {
-            rover.mode_loiter.update();
-            break;
-        }
-
-        case Guided_SteeringAndThrottle:
-        {
-            // handle timeout
-            if (_have_strthr && (AP_HAL::millis() - _strthr_time_ms) > 3000) {
-                _have_strthr = false;
-                gcs().send_text(MAV_SEVERITY_WARNING, "target not received last 3secs, stopping");
-            }
-            if (_have_strthr) {
-                // pass latest steering and throttle directly to motors library
-                g2.motors.set_steering(_strthr_steering * 4500.0f, false);
-                g2.motors.set_throttle(_strthr_throttle * 100.0f);
             } else {
-                // loiter or stop vehicle
-                if (rover.is_boat()) {
-                    if (!start_loiter()) {
-                        stop_vehicle();
-                    }
-                } else {
+                stop_vehicle();
+            }
+        }
+        break;
+    }
+
+    case Guided_Loiter: {
+        rover.mode_loiter.update();
+        break;
+    }
+
+    case Guided_SteeringAndThrottle: {
+        // handle timeout
+        if (_have_strthr && (AP_HAL::millis() - _strthr_time_ms) > 3000) {
+            _have_strthr = false;
+            gcs().send_text(MAV_SEVERITY_WARNING, "target not received last 3secs, stopping");
+        }
+        if (_have_strthr) {
+            // pass latest steering and throttle directly to motors library
+            g2.motors.set_steering(_strthr_steering * 4500.0f, false);
+            g2.motors.set_throttle(_strthr_throttle * 100.0f);
+        } else {
+            // loiter or stop vehicle
+            if (rover.is_boat()) {
+                if (!start_loiter()) {
                     stop_vehicle();
                 }
+            } else {
+                stop_vehicle();
             }
-            break;
         }
+        break;
+    }
 
-        case Guided_Stop:
-            stop_vehicle();
-            break;
+    case Guided_Stop:
+        stop_vehicle();
+        break;
 
-        default:
-            gcs().send_text(MAV_SEVERITY_WARNING, "Unknown GUIDED mode");
-            break;
+    default:
+        gcs().send_text(MAV_SEVERITY_WARNING, "Unknown GUIDED mode");
+        break;
     }
 }
 

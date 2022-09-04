@@ -25,41 +25,41 @@
 #include <AP_HAL/AP_HAL.h>
 #include <AC_PID/AC_P.h>
 #include <AC_PID/AC_PID.h>
-#include <AP_AccelCal/AP_AccelCal.h>                // interface and maths for accelerometer calibration
-#include <AP_AHRS/AP_AHRS.h>                        // ArduPilot Mega DCM Library
+#include <AP_AccelCal/AP_AccelCal.h> // interface and maths for accelerometer calibration
+#include <AP_AHRS/AP_AHRS.h>         // ArduPilot Mega DCM Library
 #include <AP_Baro/AP_Baro.h>
-#include <AP_BattMonitor/AP_BattMonitor.h>          // Battery monitor library
+#include <AP_BattMonitor/AP_BattMonitor.h> // Battery monitor library
 #include <AP_Beacon/AP_Beacon.h>
-#include <AP_Camera/AP_Camera.h>                    // Camera triggering
-#include <AP_Compass/AP_Compass.h>                  // ArduPilot Mega Magnetometer Library
-#include <AP_Declination/AP_Declination.h>          // Compass declination library
-#include <AP_InertialSensor/AP_InertialSensor.h>    // Inertial Sensor (uncalibated IMU) Library
+#include <AP_Camera/AP_Camera.h>                 // Camera triggering
+#include <AP_Compass/AP_Compass.h>               // ArduPilot Mega Magnetometer Library
+#include <AP_Declination/AP_Declination.h>       // Compass declination library
+#include <AP_InertialSensor/AP_InertialSensor.h> // Inertial Sensor (uncalibated IMU) Library
 #include <AP_L1_Control/AP_L1_Control.h>
-#include <AP_Math/AP_Math.h>                        // ArduPilot Mega Vector/Matrix math Library
-#include <AP_Mission/AP_Mission.h>                  // Mission command library
-#include <AP_Mount/AP_Mount.h>                      // Camera/Antenna mount
+#include <AP_Math/AP_Math.h>       // ArduPilot Mega Vector/Matrix math Library
+#include <AP_Mission/AP_Mission.h> // Mission command library
+#include <AP_Mount/AP_Mount.h>     // Camera/Antenna mount
 #include <AP_NavEKF2/AP_NavEKF2.h>
 #include <AP_NavEKF3/AP_NavEKF3.h>
 #include <AP_Navigation/AP_Navigation.h>
-#include <AP_OpticalFlow/AP_OpticalFlow.h>          // Optical Flow library
+#include <AP_OpticalFlow/AP_OpticalFlow.h> // Optical Flow library
 #include <AP_Param/AP_Param.h>
-#include <AP_RangeFinder/AP_RangeFinder.h>          // Range finder library
-#include <AP_RCMapper/AP_RCMapper.h>                // RC input mapping library
-#include <AP_Scheduler/AP_Scheduler.h>              // main loop scheduler
-#include <AP_Stats/AP_Stats.h>                      // statistics library
+#include <AP_RangeFinder/AP_RangeFinder.h> // Range finder library
+#include <AP_RCMapper/AP_RCMapper.h>       // RC input mapping library
+#include <AP_Scheduler/AP_Scheduler.h>     // main loop scheduler
+#include <AP_Stats/AP_Stats.h>             // statistics library
 #include <AP_Terrain/AP_Terrain.h>
-#include <AP_Vehicle/AP_Vehicle.h>                  // needed for AHRS build
+#include <AP_Vehicle/AP_Vehicle.h> // needed for AHRS build
 #include <AP_WheelEncoder/AP_WheelEncoder.h>
 #include <AP_WheelEncoder/AP_WheelRateControl.h>
 #include <APM_Control/AR_AttitudeControl.h>
 #include <AR_WPNav/AR_WPNav.h>
 #include <AP_SmartRTL/AP_SmartRTL.h>
 #include <AP_Logger/AP_Logger.h>
-#include <Filter/AverageFilter.h>                   // Mode Filter from Filter library
-#include <Filter/Butter.h>                          // Filter library - butterworth filter
-#include <Filter/Filter.h>                          // Filter library
+#include <Filter/AverageFilter.h> // Mode Filter from Filter library
+#include <Filter/Butter.h>        // Filter library - butterworth filter
+#include <Filter/Filter.h>        // Filter library
 #include <Filter/LowPassFilter.h>
-#include <Filter/ModeFilter.h>                      // Mode Filter from Filter library
+#include <Filter/ModeFilter.h> // Mode Filter from Filter library
 #include <AC_Fence/AC_Fence.h>
 #include <AP_Proximity/AP_Proximity.h>
 #include <AC_Avoidance/AC_Avoid.h>
@@ -89,9 +89,14 @@
 #include "GCS_Mavlink.h"
 #include "GCS_Rover.h"
 #include "AP_Rally.h"
-#include "RC_Channel.h"                  // RC Channel Library
+#include "RC_Channel.h" // RC Channel Library
 
-class Rover : public AP_Vehicle {
+//
+#include <AR_ILOS_Control/AR_ILOS_Control.h>
+//
+
+class Rover : public AP_Vehicle
+{
 public:
     friend class GCS_MAVLINK_Rover;
     friend class Parameters;
@@ -123,7 +128,6 @@ public:
     Rover(void);
 
 private:
-
     // must be the first AP_Param variable declared to ensure its
     // constructor runs before the constructors of the other AP_Param
     // variables
@@ -158,6 +162,8 @@ private:
 
     AP_L1_Control L1_controller{ahrs, nullptr};
 
+    AR_ILOS_Control ILOS_controller{ahrs};
+
 #if AP_OPTICALFLOW_ENABLED
     OpticalFlow optflow;
 #endif
@@ -167,18 +173,24 @@ private:
 #endif
 
     // GCS handling
-    GCS_Rover _gcs;  // avoid using this; use gcs()
-    GCS_Rover &gcs() { return _gcs; }
+    GCS_Rover _gcs; // avoid using this; use gcs()
+    GCS_Rover &gcs()
+    {
+        return _gcs;
+    }
 
     // RC Channels:
-    RC_Channels_Rover &rc() { return g2.rc_channels; }
+    RC_Channels_Rover &rc()
+    {
+        return g2.rc_channels;
+    }
 
     // The rover's current location
     struct Location current_loc;
 
     // Camera
 #if CAMERA == ENABLED
-    AP_Camera camera{MASK_LOG_CAMERA};
+    AP_Camera camera {MASK_LOG_CAMERA};
 #endif
 
     // Camera/Antenna mount tracking and stabilisation stuff
@@ -199,10 +211,10 @@ private:
 
     // structure for holding failsafe state
     struct {
-        uint8_t bits;               // bit flags of failsafes that have started (but not necessarily triggered an action)
-        uint32_t start_time;        // start time of the earliest failsafe
-        uint8_t triggered;          // bit flags of failsafes that have triggered an action
-        uint32_t last_valid_rc_ms;  // system time of most recent RC input from pilot
+        uint8_t bits;              // bit flags of failsafes that have started (but not necessarily triggered an action)
+        uint32_t start_time;       // start time of the earliest failsafe
+        uint8_t triggered;         // bit flags of failsafes that have triggered an action
+        uint32_t last_valid_rc_ms; // system time of most recent RC input from pilot
         bool ekf;
     } failsafe;
 
@@ -218,8 +230,8 @@ private:
 
     // Battery Sensors
     AP_BattMonitor battery{MASK_LOG_CURRENT,
-                           FUNCTOR_BIND_MEMBER(&Rover::handle_battery_failsafe, void, const char*, const int8_t),
-                           _failsafe_priorities};
+                       FUNCTOR_BIND_MEMBER(&Rover::handle_battery_failsafe, void, const char *, const int8_t),
+                       _failsafe_priorities};
 
     // flyforward timer
     uint32_t flyforward_start_ms;
@@ -265,11 +277,10 @@ private:
     cruise_learn_t cruise_learn;
 
 private:
-
     // Rover.cpp
 #if AP_SCRIPTING_ENABLED
-    bool set_target_location(const Location& target_loc) override;
-    bool set_target_velocity_NED(const Vector3f& vel_ned) override;
+    bool set_target_location(const Location &target_loc) override;
+    bool set_target_velocity_NED(const Vector3f &vel_ned) override;
     bool set_steering_and_throttle(float steering, float throttle) override;
     // set desired turn rate (degrees/sec) and speed (m/s). Used for scripting
     bool set_desired_turn_rate_and_speed(float turn_rate, float speed) override;
@@ -293,7 +304,7 @@ private:
 
     // commands.cpp
     bool set_home_to_current_location(bool lock) WARN_IF_UNUSED;
-    bool set_home(const Location& loc, bool lock) WARN_IF_UNUSED;
+    bool set_home(const Location &loc, bool lock) WARN_IF_UNUSED;
     void update_home();
 
     // crash_check.cpp
@@ -313,8 +324,8 @@ private:
     void failsafe_ekf_off_event(void);
 
     // failsafe.cpp
-    void failsafe_trigger(uint8_t failsafe_type, const char* type_str, bool on);
-    void handle_battery_failsafe(const char* type_str, const int8_t action);
+    void failsafe_trigger(uint8_t failsafe_type, const char *type_str, bool on);
+    void handle_battery_failsafe(const char *type_str, const int8_t action);
 #if ADVANCED_FAILSAFE == ENABLED
     void afs_fs_check(void);
 #endif
@@ -328,7 +339,7 @@ private:
     // Log.cpp
     void Log_Write_Attitude();
     void Log_Write_Depth();
-    void Log_Write_GuidedTarget(uint8_t target_type, const Vector3f& pos_target, const Vector3f& vel_target);
+    void Log_Write_GuidedTarget(uint8_t target_type, const Vector3f &pos_target, const Vector3f &vel_target);
     void Log_Write_Nav_Tuning();
     void Log_Write_Sail();
     void Log_Write_Steering();
@@ -371,7 +382,10 @@ private:
     void update_ahrs_flyforward();
     bool set_mode(Mode &new_mode, ModeReason reason);
     bool set_mode(const uint8_t new_mode, ModeReason reason) override;
-    uint8_t get_mode() const override { return (uint8_t)control_mode->mode_number(); }
+    uint8_t get_mode() const override
+    {
+        return (uint8_t)control_mode->mode_number();
+    }
     void startup_INS_ground(void);
     void notify_mode(const Mode *new_mode);
     uint8_t check_digital_pin(uint8_t pin);
@@ -384,30 +398,29 @@ private:
     bool get_wp_crosstrack_error_m(float &xtrack_error) const override;
 
     enum Failsafe_Action {
-        Failsafe_Action_None          = 0,
-        Failsafe_Action_RTL           = 1,
-        Failsafe_Action_Hold          = 2,
-        Failsafe_Action_SmartRTL      = 3,
+        Failsafe_Action_None = 0,
+        Failsafe_Action_RTL = 1,
+        Failsafe_Action_Hold = 2,
+        Failsafe_Action_SmartRTL = 3,
         Failsafe_Action_SmartRTL_Hold = 4,
-        Failsafe_Action_Terminate     = 5
+        Failsafe_Action_Terminate = 5
     };
 
     enum class Failsafe_Options : uint32_t {
-        Failsafe_Option_Active_In_Hold = (1<<0)
+        Failsafe_Option_Active_In_Hold = (1 << 0)
     };
 
     static constexpr int8_t _failsafe_priorities[] = {
-                                                       Failsafe_Action_Terminate,
-                                                       Failsafe_Action_Hold,
-                                                       Failsafe_Action_RTL,
-                                                       Failsafe_Action_SmartRTL_Hold,
-                                                       Failsafe_Action_SmartRTL,
-                                                       Failsafe_Action_None,
-                                                       -1 // the priority list must end with a sentinel of -1
-                                                      };
+        Failsafe_Action_Terminate,
+        Failsafe_Action_Hold,
+        Failsafe_Action_RTL,
+        Failsafe_Action_SmartRTL_Hold,
+        Failsafe_Action_SmartRTL,
+        Failsafe_Action_None,
+        -1 // the priority list must end with a sentinel of -1
+    };
     static_assert(_failsafe_priorities[ARRAY_SIZE(_failsafe_priorities) - 1] == -1,
                   "_failsafe_priorities is missing the sentinel");
-
 
 public:
     void failsafe_check();
@@ -418,14 +431,24 @@ public:
     void motor_test_stop();
 
     // frame type
-    uint8_t get_frame_type() const { return g2.frame_type.get(); }
-    AP_WheelRateControl& get_wheel_rate_control() { return g2.wheel_rate_control; }
+    uint8_t get_frame_type() const
+    {
+        return g2.frame_type.get();
+    }
+    AP_WheelRateControl &get_wheel_rate_control()
+    {
+        return g2.wheel_rate_control;
+    }
 
+    uint8_t get_nav_controller_type() const
+    {
+        return g.nav_controller.get();
+    }
     // Simple mode
     float simple_sin_yaw;
 };
 
 extern Rover rover;
 
-using AP_HAL::millis;
 using AP_HAL::micros;
+using AP_HAL::millis;

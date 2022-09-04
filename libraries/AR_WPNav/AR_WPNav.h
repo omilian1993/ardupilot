@@ -11,10 +11,13 @@ class AR_WPNav {
 public:
 
     // constructor
-    AR_WPNav(AR_AttitudeControl& atc, AP_Navigation& nav_controller);
+    AR_WPNav(AR_AttitudeControl& atc, AP_Navigation* nav_controller);
 
     // update navigation
     void update(float dt);
+
+    //update navigation controller
+    void update_nav_controller(AP_Navigation* nav_controller){ _nav_controller=nav_controller;};
 
     // return desired speed
     float get_desired_speed() const { return _desired_speed; }
@@ -127,7 +130,7 @@ private:
 
     // references
     AR_AttitudeControl& _atc;       // rover attitude control library
-    AP_Navigation& _nav_controller; // navigation controller (aka L1 controller)
+    AP_Navigation* _nav_controller; // navigation controller (aka L1 controller)
 
     // variables held in vehicle code (for now)
     float _turn_radius;             // vehicle turn radius in meters

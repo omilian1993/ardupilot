@@ -63,17 +63,17 @@ void Rover::cruise_learn_complete()
 // logging for cruise learn
 void Rover::log_write_cruise_learn() const
 {
-// @LoggerMessage: CRSE
-// @Description: Cruise Learn messages
-// @URL: https://ardupilot.org/rover/docs/rover-tuning-throttle-and-speed.html
-// @Field: TimeUS: Time since system startup
-// @Field: State: True if Cruise Learn has started
-// @Field: Speed: Determined target Cruise speed in auto missions
-// @Field: Throttle: Determined base throttle percentage to be used in auto missions 
+    // @LoggerMessage: CRSE
+    // @Description: Cruise Learn messages
+    // @URL: https://ardupilot.org/rover/docs/rover-tuning-throttle-and-speed.html
+    // @Field: TimeUS: Time since system startup
+    // @Field: State: True if Cruise Learn has started
+    // @Field: Speed: Determined target Cruise speed in auto missions
+    // @Field: Throttle: Determined base throttle percentage to be used in auto missions
 
     AP::logger().WriteStreaming("CRSE", "TimeUS,State,Speed,Throttle", "Qbff",
-                       AP_HAL::micros64(),
-                       cruise_learn.learn_start_ms > 0,
-                       cruise_learn.speed_filt.get(),
-                       cruise_learn.throttle_filt.get());
+                                AP_HAL::micros64(),
+                                cruise_learn.learn_start_ms > 0,
+                                cruise_learn.speed_filt.get(),
+                                cruise_learn.throttle_filt.get());
 }

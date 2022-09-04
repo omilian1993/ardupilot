@@ -35,19 +35,19 @@ void ModeAcro::update()
         // call heading controller during tacking
 
         steering_out = attitude_control.get_steering_out_heading(rover.g2.sailboat.get_tack_heading_rad(),
-                                                                 g2.wp_nav.get_pivot_rate(),
-                                                                 g2.motors.limit.steer_left,
-                                                                 g2.motors.limit.steer_right,
-                                                                 rover.G_Dt);
+                       g2.wp_nav.get_pivot_rate(),
+                       g2.motors.limit.steer_left,
+                       g2.motors.limit.steer_right,
+                       rover.G_Dt);
     } else {
         // convert pilot steering input to desired turn rate in radians/sec
         const float target_turn_rate = (desired_steering / 4500.0f) * radians(g2.acro_turn_rate);
 
         // run steering turn rate controller and throttle controller
         steering_out = attitude_control.get_steering_out_rate(target_turn_rate,
-                                                              g2.motors.limit.steer_left,
-                                                              g2.motors.limit.steer_right,
-                                                              rover.G_Dt);
+                       g2.motors.limit.steer_left,
+                       g2.motors.limit.steer_right,
+                       rover.G_Dt);
     }
 
     set_steering(steering_out * 4500.0f);

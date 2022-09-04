@@ -10,7 +10,8 @@ class GCS_Rover : public GCS
 public:
 
     // return GCS link at offset ofs
-    GCS_MAVLINK_Rover *chan(const uint8_t ofs) override {
+    GCS_MAVLINK_Rover *chan(const uint8_t ofs) override
+    {
         if (ofs > _num_gcs) {
             INTERNAL_ERROR(AP_InternalError::error_t::gcs_offset);
             return nullptr;
@@ -18,7 +19,8 @@ public:
         return (GCS_MAVLINK_Rover*)_chan[ofs];
     }
     // return GCS link at offset ofs
-    const GCS_MAVLINK_Rover *chan(const uint8_t ofs) const override {
+    const GCS_MAVLINK_Rover *chan(const uint8_t ofs) const override
+    {
         if (ofs > _num_gcs) {
             INTERNAL_ERROR(AP_InternalError::error_t::gcs_offset);
             return nullptr;
@@ -41,7 +43,8 @@ protected:
     uint8_t sysid_this_mav() const override;
 
     GCS_MAVLINK_Rover *new_gcs_mavlink_backend(GCS_MAVLINK_Parameters &params,
-                                               AP_HAL::UARTDriver &uart) override {
+            AP_HAL::UARTDriver &uart) override
+    {
         return new GCS_MAVLINK_Rover(params, uart);
     }
 

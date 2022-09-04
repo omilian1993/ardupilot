@@ -4,51 +4,79 @@
   Rover parameter definitions
 */
 
-#define GSCALAR(v, name, def) { rover.g.v.vtype, name, Parameters::k_param_ ## v, &rover.g.v, {def_value:def} }
-#define GGROUP(v, name, class) { AP_PARAM_GROUP, name, Parameters::k_param_ ## v, &rover.g.v, {group_info:class::var_info} }
-#define GOBJECT(v, name, class) { AP_PARAM_GROUP, name, Parameters::k_param_ ## v, &rover.v, {group_info:class::var_info} }
-#define GOBJECTN(v, pname, name, class) { AP_PARAM_GROUP, name, Parameters::k_param_ ## pname, &rover.v, {group_info : class::var_info} }
+#define GSCALAR(v, name, def)                                       \
+    {                                                               \
+        rover.g.v.vtype, name, Parameters::k_param_##v, &rover.g.v, \
+        {                                                           \
+        def_value:                                                  \
+            def                                                     \
+        }                                                           \
+    }
+#define GGROUP(v, name, class)                                     \
+    {                                                              \
+        AP_PARAM_GROUP, name, Parameters::k_param_##v, &rover.g.v, \
+        {                                                          \
+        group_info:                                                \
+            class ::var_info                                       \
+        }                                                          \
+    }
+#define GOBJECT(v, name, class)                                  \
+    {                                                            \
+        AP_PARAM_GROUP, name, Parameters::k_param_##v, &rover.v, \
+        {                                                        \
+        group_info:                                              \
+            class ::var_info                                     \
+        }                                                        \
+    }
+#define GOBJECTN(v, pname, name, class)                              \
+    {                                                                \
+        AP_PARAM_GROUP, name, Parameters::k_param_##pname, &rover.v, \
+        {                                                            \
+        group_info:                                                  \
+            class ::var_info                                         \
+        }                                                            \
+    }
 
 const AP_Param::Info Rover::var_info[] = {
     // @Param: FORMAT_VERSION
     // @DisplayName: Eeprom format version number
     // @Description: This value is incremented when changes are made to the eeprom format
     // @User: Advanced
-    GSCALAR(format_version,         "FORMAT_VERSION",   1),
+    GSCALAR(format_version, "FORMAT_VERSION", 1),
 
     // @Param: LOG_BITMASK
     // @DisplayName: Log bitmask
     // @Description: Bitmap of what log types to enable in on-board logger. This value is made up of the sum of each of the log types you want to be saved. On boards supporting microSD cards or other large block-storage devices it is usually best just to enable all log types by setting this to 65535. The individual bits are ATTITUDE_FAST=1, ATTITUDE_MEDIUM=2, GPS=4, PerformanceMonitoring=8, ControlTuning=16, NavigationTuning=32, Mode=64, IMU=128, Commands=256, Battery=512, Compass=1024, TECS=2048, Camera=4096, RCandServo=8192, Rangefinder=16384, Arming=32768, FullLogs=65535
     // @Bitmask: 0:ATTITUDE_FAST,1:ATTITUDE_MED,2:GPS,3:PM,4:THR,5:NTUN,7:IMU,8:CMD,9:CURRENT,10:RANGEFINDER,11:COMPASS,12:CAMERA,13:STEERING,14:RC,15:ARM/DISARM,19:IMU_RAW,20:VideoStabilization
     // @User: Advanced
-    GSCALAR(log_bitmask,            "LOG_BITMASK",      DEFAULT_LOG_BITMASK),
+    GSCALAR(log_bitmask, "LOG_BITMASK", DEFAULT_LOG_BITMASK),
 
     // @Param: RST_SWITCH_CH
     // @DisplayName: Reset Switch Channel
     // @Description: RC channel to use to reset to last flight mode after geofence takeover.
     // @User: Advanced
-    GSCALAR(reset_switch_chan,      "RST_SWITCH_CH",    0),
+    GSCALAR(reset_switch_chan, "RST_SWITCH_CH", 0),
 
     // @Param: INITIAL_MODE
     // @DisplayName: Initial driving mode
     // @Description: This selects the mode to start in on boot. This is useful for when you want to start in AUTO mode on boot without a receiver. Usually used in combination with when AUTO_TRIGGER_PIN or AUTO_KICKSTART.
     // @Values: 0:Manual,1:Acro,3:Steering,4:Hold,5:Loiter,6:Follow,7:Simple,10:Auto,11:RTL,12:SmartRTL,15:Guided
     // @User: Advanced
-    GSCALAR(initial_mode,        "INITIAL_MODE",     Mode::Number::MANUAL),
+    GSCALAR(initial_mode, "INITIAL_MODE", Mode::Number::MANUAL),
 
     // @Param: SYSID_THISMAV
     // @DisplayName: MAVLink system ID of this vehicle
     // @Description: Allows setting an individual MAVLink system id for this vehicle to distinguish it from others on the same network
     // @Range: 1 255
     // @User: Advanced
-    GSCALAR(sysid_this_mav,         "SYSID_THISMAV",    MAV_SYSTEM_ID),
+    GSCALAR(sysid_this_mav, "SYSID_THISMAV", MAV_SYSTEM_ID),
 
     // @Param: SYSID_MYGCS
     // @DisplayName: MAVLink ground station ID
     // @Description: The identifier of the ground station in the MAVLink protocol. Don't change this unless you also modify the ground station to match.
     // @Range: 1 255
     // @User: Advanced
-    GSCALAR(sysid_my_gcs,           "SYSID_MYGCS",      255),
+    GSCALAR(sysid_my_gcs, "SYSID_MYGCS", 255),
 
     // @Param: TELEM_DELAY
     // @DisplayName: Telemetry startup delay
@@ -57,7 +85,7 @@ const AP_Param::Info Rover::var_info[] = {
     // @Units: s
     // @Range: 0 30
     // @Increment: 1
-    GSCALAR(telem_delay,            "TELEM_DELAY",     0),
+    GSCALAR(telem_delay, "TELEM_DELAY", 0),
 
     // @Param: GCS_PID_MASK
     // @DisplayName: GCS PID tuning mask
@@ -65,14 +93,14 @@ const AP_Param::Info Rover::var_info[] = {
     // @User: Advanced
     // @Values: 0:None,1:Steering,2:Throttle,4:Pitch,8:Left Wheel,16:Right Wheel,32:Sailboat Heel
     // @Bitmask: 0:Steering,1:Throttle,2:Pitch,3:Left Wheel,4:Right Wheel,5:Sailboat Heel
-    GSCALAR(gcs_pid_mask,           "GCS_PID_MASK",     0),
+    GSCALAR(gcs_pid_mask, "GCS_PID_MASK", 0),
 
     // @Param: AUTO_TRIGGER_PIN
     // @DisplayName: Auto mode trigger pin
     // @Description: pin number to use to enable the throttle in auto mode. If set to -1 then don't use a trigger, otherwise this is a pin number which if held low in auto mode will enable the motor to run. If the switch is released while in AUTO then the motor will stop again. This can be used in combination with INITIAL_MODE to give a 'press button to start' rover with no receiver.
     // @Values: -1:Disabled,0:APM TriggerPin0,1:APM TriggerPin1,2:APM TriggerPin2,3:APM TriggerPin3,4:APM TriggerPin4,5:APM TriggerPin5,6:APM TriggerPin6,7:APM TriggerPin7,8:APM TriggerPin8,50:AUX1,51:AUX2,52:AUX3,53:AUX4,54:AUX5,55:AUX6
     // @User: Standard
-    GSCALAR(auto_trigger_pin,        "AUTO_TRIGGER_PIN", -1),
+    GSCALAR(auto_trigger_pin, "AUTO_TRIGGER_PIN", -1),
 
     // @Param: AUTO_KICKSTART
     // @DisplayName: Auto mode trigger kickstart acceleration
@@ -81,7 +109,7 @@ const AP_Param::Info Rover::var_info[] = {
     // @Range: 0 20
     // @Increment: 0.1
     // @User: Standard
-    GSCALAR(auto_kickstart,          "AUTO_KICKSTART", 0.0f),
+    GSCALAR(auto_kickstart, "AUTO_KICKSTART", 0.0f),
 
     // @Param: CRUISE_SPEED
     // @DisplayName: Target cruise speed in auto modes
@@ -90,8 +118,7 @@ const AP_Param::Info Rover::var_info[] = {
     // @Range: 0 100
     // @Increment: 0.1
     // @User: Standard
-    GSCALAR(speed_cruise,        "CRUISE_SPEED",    CRUISE_SPEED),
-
+    GSCALAR(speed_cruise, "CRUISE_SPEED", CRUISE_SPEED),
 
     // @Param: CRUISE_THROTTLE
     // @DisplayName: Base throttle percentage in auto
@@ -100,7 +127,7 @@ const AP_Param::Info Rover::var_info[] = {
     // @Range: 0 100
     // @Increment: 1
     // @User: Standard
-    GSCALAR(throttle_cruise,        "CRUISE_THROTTLE",    50),
+    GSCALAR(throttle_cruise, "CRUISE_THROTTLE", 50),
 
     // @Param: PILOT_STEER_TYPE
     // @DisplayName: Pilot input steering type
@@ -114,7 +141,7 @@ const AP_Param::Info Rover::var_info[] = {
     // @Description: What to do on a failsafe event
     // @Values: 0:Nothing,1:RTL,2:Hold,3:SmartRTL or RTL,4:SmartRTL or Hold
     // @User: Standard
-    GSCALAR(fs_action,    "FS_ACTION",     Failsafe_Action_Hold),
+    GSCALAR(fs_action, "FS_ACTION", Failsafe_Action_Hold),
 
     // @Param: FS_TIMEOUT
     // @DisplayName: Failsafe timeout
@@ -123,14 +150,14 @@ const AP_Param::Info Rover::var_info[] = {
     // @Range: 1 100
     // @Increment: 0.5
     // @User: Standard
-    GSCALAR(fs_timeout,    "FS_TIMEOUT",     1.5),
+    GSCALAR(fs_timeout, "FS_TIMEOUT", 1.5),
 
     // @Param: FS_THR_ENABLE
     // @DisplayName: Throttle Failsafe Enable
     // @Description: The throttle failsafe allows you to configure a software failsafe activated by a setting on the throttle input channel to a low value. This can be used to detect the RC transmitter going out of range. Failsafe will be triggered when the throttle channel goes below the FS_THR_VALUE for FS_TIMEOUT seconds.
     // @Values: 0:Disabled,1:Enabled,2:Enabled Continue with Mission in Auto
     // @User: Standard
-    GSCALAR(fs_throttle_enabled,    "FS_THR_ENABLE",     FS_THR_ENABLED),
+    GSCALAR(fs_throttle_enabled, "FS_THR_ENABLE", FS_THR_ENABLED),
 
     // @Param: FS_THR_VALUE
     // @DisplayName: Throttle Failsafe Value
@@ -138,21 +165,21 @@ const AP_Param::Info Rover::var_info[] = {
     // @Range: 910 1100
     // @Increment: 1
     // @User: Standard
-    GSCALAR(fs_throttle_value,      "FS_THR_VALUE",     910),
+    GSCALAR(fs_throttle_value, "FS_THR_VALUE", 910),
 
     // @Param: FS_GCS_ENABLE
     // @DisplayName: GCS failsafe enable
     // @Description: Enable ground control station telemetry failsafe. When enabled the Rover will execute the FS_ACTION when it fails to receive MAVLink heartbeat packets for FS_TIMEOUT seconds.
     // @Values: 0:Disabled,1:Enabled,2:Enabled Continue with Mission in Auto
     // @User: Standard
-    GSCALAR(fs_gcs_enabled, "FS_GCS_ENABLE",   FS_GCS_DISABLED),
+    GSCALAR(fs_gcs_enabled, "FS_GCS_ENABLE", FS_GCS_DISABLED),
 
     // @Param: FS_CRASH_CHECK
     // @DisplayName: Crash check action
     // @Description: What to do on a crash event. When enabled the rover will go to hold if a crash is detected.
     // @Values: 0:Disabled,1:Hold,2:HoldAndDisarm
     // @User: Standard
-    GSCALAR(fs_crash_check, "FS_CRASH_CHECK",    FS_CRASH_DISABLE),
+    GSCALAR(fs_crash_check, "FS_CRASH_CHECK", FS_CRASH_DISABLE),
 
     // @Param: FS_EKF_ACTION
     // @DisplayName: EKF Failsafe Action
@@ -172,55 +199,61 @@ const AP_Param::Info Rover::var_info[] = {
     // @DisplayName: Mode channel
     // @Description: RC Channel to use for driving mode control
     // @User: Advanced
-    GSCALAR(mode_channel,    "MODE_CH",       MODE_CHANNEL),
+    GSCALAR(mode_channel, "MODE_CH", MODE_CHANNEL),
 
     // @Param: MODE1
     // @DisplayName: Mode1
     // @Values: 0:Manual,1:Acro,3:Steering,4:Hold,5:Loiter,6:Follow,7:Simple,10:Auto,11:RTL,12:SmartRTL,15:Guided
     // @User: Standard
     // @Description: Driving mode for switch position 1 (910 to 1230 and above 2049)
-    GSCALAR(mode1,           "MODE1",         Mode::Number::MANUAL),
+    GSCALAR(mode1, "MODE1", Mode::Number::MANUAL),
 
     // @Param: MODE2
     // @DisplayName: Mode2
     // @Description: Driving mode for switch position 2 (1231 to 1360)
     // @CopyValuesFrom: MODE1
     // @User: Standard
-    GSCALAR(mode2,           "MODE2",         Mode::Number::MANUAL),
+    GSCALAR(mode2, "MODE2", Mode::Number::MANUAL),
 
     // @Param: MODE3
     // @DisplayName: Mode3
     // @Description: Driving mode for switch position 3 (1361 to 1490)
     // @CopyValuesFrom: MODE1
     // @User: Standard
-    GSCALAR(mode3,           "MODE3",         Mode::Number::MANUAL),
+    GSCALAR(mode3, "MODE3", Mode::Number::MANUAL),
 
     // @Param: MODE4
     // @DisplayName: Mode4
     // @Description: Driving mode for switch position 4 (1491 to 1620)
     // @CopyValuesFrom: MODE1
     // @User: Standard
-    GSCALAR(mode4,           "MODE4",         Mode::Number::MANUAL),
+    GSCALAR(mode4, "MODE4", Mode::Number::MANUAL),
 
     // @Param: MODE5
     // @DisplayName: Mode5
     // @Description: Driving mode for switch position 5 (1621 to 1749)
     // @CopyValuesFrom: MODE1
     // @User: Standard
-    GSCALAR(mode5,           "MODE5",         Mode::Number::MANUAL),
+    GSCALAR(mode5, "MODE5", Mode::Number::MANUAL),
 
     // @Param: MODE6
     // @DisplayName: Mode6
     // @Description: Driving mode for switch position 6 (1750 to 2049)
     // @CopyValuesFrom: MODE1
     // @User: Standard
-    GSCALAR(mode6,           "MODE6",         Mode::Number::MANUAL),
+    GSCALAR(mode6, "MODE6", Mode::Number::MANUAL),
 
+    // @Param: NAV_CONTROLLER
+    // @DisplayName: Navigation controller selection
+    // @Description: Which navigation controller to enable. Currently the only navigation controller available is L1. From time to time other experimental controllers will be added which are selected using this parameter.
+    // @Values: 0:Default,1:L1Controller,2:ILOS
+    // @User: Standard
+    GSCALAR(nav_controller, "NAV_CONTROLLER", CUSTOM_NAV_CONTROLLER),
     // variables not in the g class which contain EEPROM saved variables
 
     // @Group: COMPASS_
     // @Path: ../libraries/AP_Compass/AP_Compass.cpp
-    GOBJECT(compass,                "COMPASS_", Compass),
+    GOBJECT(compass, "COMPASS_", Compass),
 
     // @Group: SCHED_
     // @Path: ../libraries/AP_Scheduler/AP_Scheduler.cpp
@@ -232,67 +265,71 @@ const AP_Param::Info Rover::var_info[] = {
 
     // @Group: RELAY_
     // @Path: ../libraries/AP_Relay/AP_Relay.cpp
-    GOBJECT(relay,                  "RELAY_", AP_Relay),
+    GOBJECT(relay, "RELAY_", AP_Relay),
 
     // @Group: RCMAP_
     // @Path: ../libraries/AP_RCMapper/AP_RCMapper.cpp
-    GOBJECT(rcmap,                 "RCMAP_",         RCMapper),
+    GOBJECT(rcmap, "RCMAP_", RCMapper),
 
     // @Group: SR0_
     // @Path: GCS_Mavlink.cpp
-    GOBJECTN(_gcs.chan_parameters[0], gcs0,        "SR0_",     GCS_MAVLINK_Parameters),
+    GOBJECTN(_gcs.chan_parameters[0], gcs0, "SR0_", GCS_MAVLINK_Parameters),
 
 #if MAVLINK_COMM_NUM_BUFFERS >= 2
     // @Group: SR1_
     // @Path: GCS_Mavlink.cpp
-    GOBJECTN(_gcs.chan_parameters[1],  gcs1,       "SR1_",     GCS_MAVLINK_Parameters),
+    GOBJECTN(_gcs.chan_parameters[1], gcs1, "SR1_", GCS_MAVLINK_Parameters),
 #endif
 
 #if MAVLINK_COMM_NUM_BUFFERS >= 3
     // @Group: SR2_
     // @Path: GCS_Mavlink.cpp
-    GOBJECTN(_gcs.chan_parameters[2],  gcs2,       "SR2_",     GCS_MAVLINK_Parameters),
+    GOBJECTN(_gcs.chan_parameters[2], gcs2, "SR2_", GCS_MAVLINK_Parameters),
 #endif
 
 #if MAVLINK_COMM_NUM_BUFFERS >= 4
     // @Group: SR3_
     // @Path: GCS_Mavlink.cpp
-    GOBJECTN(_gcs.chan_parameters[3],  gcs3,       "SR3_",     GCS_MAVLINK_Parameters),
+    GOBJECTN(_gcs.chan_parameters[3], gcs3, "SR3_", GCS_MAVLINK_Parameters),
 #endif
 
 #if MAVLINK_COMM_NUM_BUFFERS >= 5
     // @Group: SR4_
     // @Path: GCS_Mavlink.cpp
-    GOBJECTN(_gcs.chan_parameters[4],  gcs4,       "SR4_",     GCS_MAVLINK_Parameters),
+    GOBJECTN(_gcs.chan_parameters[4], gcs4, "SR4_", GCS_MAVLINK_Parameters),
 #endif
 
 #if MAVLINK_COMM_NUM_BUFFERS >= 6
     // @Group: SR5_
     // @Path: GCS_Mavlink.cpp
-    GOBJECTN(_gcs.chan_parameters[5],  gcs5,       "SR5_",     GCS_MAVLINK_Parameters),
+    GOBJECTN(_gcs.chan_parameters[5], gcs5, "SR5_", GCS_MAVLINK_Parameters),
 #endif
 
 #if MAVLINK_COMM_NUM_BUFFERS >= 7
     // @Group: SR6_
     // @Path: GCS_Mavlink.cpp
-    GOBJECTN(_gcs.chan_parameters[6],  gcs6,       "SR6_",     GCS_MAVLINK_Parameters),
+    GOBJECTN(_gcs.chan_parameters[6], gcs6, "SR6_", GCS_MAVLINK_Parameters),
 #endif
 
     // @Group: SERIAL
     // @Path: ../libraries/AP_SerialManager/AP_SerialManager.cpp
-    GOBJECT(serial_manager,         "SERIAL",   AP_SerialManager),
+    GOBJECT(serial_manager, "SERIAL", AP_SerialManager),
 
     // @Group: NAVL1_
     // @Path: ../libraries/AP_L1_Control/AP_L1_Control.cpp
-    GOBJECT(L1_controller,         "NAVL1_",   AP_L1_Control),
+    GOBJECT(L1_controller, "NAVL1_", AP_L1_Control),
+
+    // @Group: NAVILOS_
+    // @Path: ../libraries/ILOS/ILOS.cpp
+    GOBJECT(ILOS_controller, "NAVILOS_", AR_ILOS_Control),
 
     // @Group: RNGFND
     // @Path: ../libraries/AP_RangeFinder/AP_RangeFinder.cpp
-    GOBJECT(rangefinder,                 "RNGFND", RangeFinder),
+    GOBJECT(rangefinder, "RNGFND", RangeFinder),
 
     // @Group: INS_
     // @Path: ../libraries/AP_InertialSensor/AP_InertialSensor.cpp
-    GOBJECT(ins,                            "INS_", AP_InertialSensor),
+    GOBJECT(ins, "INS_", AP_InertialSensor),
 
 #if CONFIG_HAL_BOARD == HAL_BOARD_SITL
     // @Group: SIM_
@@ -302,40 +339,40 @@ const AP_Param::Info Rover::var_info[] = {
 
     // @Group: AHRS_
     // @Path: ../libraries/AP_AHRS/AP_AHRS.cpp
-    GOBJECT(ahrs,                   "AHRS_",    AP_AHRS),
+    GOBJECT(ahrs, "AHRS_", AP_AHRS),
 
 #if CAMERA == ENABLED
     // @Group: CAM_
     // @Path: ../libraries/AP_Camera/AP_Camera.cpp
-    GOBJECT(camera,                  "CAM_", AP_Camera),
+    GOBJECT(camera, "CAM_", AP_Camera),
 #endif
 
 #if HAL_MOUNT_ENABLED
     // @Group: MNT
     // @Path: ../libraries/AP_Mount/AP_Mount.cpp
-    GOBJECT(camera_mount,           "MNT",  AP_Mount),
+    GOBJECT(camera_mount, "MNT", AP_Mount),
 #endif
 
     // @Group: ARMING_
     // @Path: ../libraries/AP_Arming/AP_Arming.cpp
-    GOBJECT(arming,                 "ARMING_", AP_Arming),
+    GOBJECT(arming, "ARMING_", AP_Arming),
 
     // @Group: LOG
     // @Path: ../libraries/AP_Logger/AP_Logger.cpp
-    GOBJECT(logger,           "LOG",  AP_Logger),
+    GOBJECT(logger, "LOG", AP_Logger),
 
     // @Group: BATT
     // @Path: ../libraries/AP_BattMonitor/AP_BattMonitor.cpp
-    GOBJECT(battery,                "BATT", AP_BattMonitor),
+    GOBJECT(battery, "BATT", AP_BattMonitor),
 
     // @Group: BRD_
     // @Path: ../libraries/AP_BoardConfig/AP_BoardConfig.cpp
-    GOBJECT(BoardConfig,            "BRD_",       AP_BoardConfig),
+    GOBJECT(BoardConfig, "BRD_", AP_BoardConfig),
 
 #if HAL_MAX_CAN_PROTOCOL_DRIVERS
     // @Group: CAN_
     // @Path: ../libraries/AP_CANManager/AP_CANManager.cpp
-    GOBJECT(can_mgr,        "CAN_",       AP_CANManager),
+    GOBJECT(can_mgr, "CAN_", AP_CANManager),
 #endif
 
     // GPS driver
@@ -365,21 +402,21 @@ const AP_Param::Info Rover::var_info[] = {
 
     // @Group: RSSI_
     // @Path: ../libraries/AP_RSSI/AP_RSSI.cpp
-    GOBJECT(rssi, "RSSI_",  AP_RSSI),
+    GOBJECT(rssi, "RSSI_", AP_RSSI),
 
     // @Group: NTF_
     // @Path: ../libraries/AP_Notify/AP_Notify.cpp
-    GOBJECT(notify, "NTF_",  AP_Notify),
+    GOBJECT(notify, "NTF_", AP_Notify),
 
 #if HAL_BUTTON_ENABLED
     // @Group: BTN_
     // @Path: ../libraries/AP_Button/AP_Button.cpp
-    GOBJECT(button, "BTN_",  AP_Button),
+    GOBJECT(button, "BTN_", AP_Button),
 #endif
 
     // @Group:
     // @Path: Parameters.cpp
-    GOBJECT(g2, "",  ParametersG2),
+    GOBJECT(g2, "", ParametersG2),
 
 #if OSD_ENABLED || OSD_PARAM_ENABLED
     // @Group: OSD
@@ -389,7 +426,7 @@ const AP_Param::Info Rover::var_info[] = {
 
     // @Group:
     // @Path: ../libraries/AP_Vehicle/AP_Vehicle.cpp
-    { AP_PARAM_GROUP, "", Parameters::k_param_vehicle, (const void *)&rover, {group_info : AP_Vehicle::var_info} },
+    {AP_PARAM_GROUP, "", Parameters::k_param_vehicle, (const void *)&rover, {group_info : AP_Vehicle::var_info}},
 
     AP_VAREND
 };
@@ -657,7 +694,7 @@ const AP_Param::GroupInfo ParametersG2::var_info[] = {
 #if HAL_AIS_ENABLED
     // @Group: AIS_
     // @Path: ../libraries/AP_AIS/AP_AIS.cpp
-    AP_SUBGROUPINFO(ais, "AIS_",  50, ParametersG2, AP_AIS),
+    AP_SUBGROUPINFO(ais, "AIS_", 50, ParametersG2, AP_AIS),
 #endif
 
     AP_GROUPEND
@@ -709,12 +746,12 @@ ParametersG2::ParametersG2(void)
     avoid(),
     follow(),
     windvane(),
-    wp_nav(attitude_control, rover.L1_controller),
+    wp_nav(attitude_control, &rover.L1_controller),
     sailboat()
+
 {
     AP_Param::setup_object_defaults(this, var_info);
 }
-
 
 /*
   This is a conversion table from old parameter values to new
@@ -730,30 +767,30 @@ ParametersG2::ParametersG2(void)
   old object. This should be zero for top level parameters.
  */
 const AP_Param::ConversionInfo conversion_table[] = {
-    { Parameters::k_param_battery_monitoring, 0,      AP_PARAM_INT8,  "BATT_MONITOR" },
-    { Parameters::k_param_battery_volt_pin,   0,      AP_PARAM_INT8,  "BATT_VOLT_PIN" },
-    { Parameters::k_param_battery_curr_pin,   0,      AP_PARAM_INT8,  "BATT_CURR_PIN" },
-    { Parameters::k_param_volt_div_ratio,     0,      AP_PARAM_FLOAT, "BATT_VOLT_MULT" },
-    { Parameters::k_param_curr_amp_per_volt,  0,      AP_PARAM_FLOAT, "BATT_AMP_PERVOLT" },
-    { Parameters::k_param_pack_capacity,      0,      AP_PARAM_INT32, "BATT_CAPACITY" },
-    { Parameters::k_param_serial0_baud,       0,      AP_PARAM_INT16, "SERIAL0_BAUD" },
-    { Parameters::k_param_serial1_baud,       0,      AP_PARAM_INT16, "SERIAL1_BAUD" },
-    { Parameters::k_param_serial2_baud,       0,      AP_PARAM_INT16, "SERIAL2_BAUD" },
-    { Parameters::k_param_throttle_min_old,   0,      AP_PARAM_INT8,  "MOT_THR_MIN" },
-    { Parameters::k_param_throttle_max_old,   0,      AP_PARAM_INT8,  "MOT_THR_MAX" },
-    { Parameters::k_param_compass_enabled_deprecated,       0,      AP_PARAM_INT8, "COMPASS_ENABLE" },
-    { Parameters::k_param_pivot_turn_angle_old,   0,  AP_PARAM_INT16,  "WP_PIVOT_ANGLE" },
-    { Parameters::k_param_waypoint_radius_old,    0,  AP_PARAM_FLOAT,  "WP_RADIUS" },
-    { Parameters::k_param_waypoint_overshoot_old, 0,  AP_PARAM_FLOAT,  "WP_OVERSHOOT" },
-    { Parameters::k_param_g2,                20,      AP_PARAM_INT16,  "WP_PIVOT_RATE" },
+    {Parameters::k_param_battery_monitoring, 0, AP_PARAM_INT8, "BATT_MONITOR"},
+    {Parameters::k_param_battery_volt_pin, 0, AP_PARAM_INT8, "BATT_VOLT_PIN"},
+    {Parameters::k_param_battery_curr_pin, 0, AP_PARAM_INT8, "BATT_CURR_PIN"},
+    {Parameters::k_param_volt_div_ratio, 0, AP_PARAM_FLOAT, "BATT_VOLT_MULT"},
+    {Parameters::k_param_curr_amp_per_volt, 0, AP_PARAM_FLOAT, "BATT_AMP_PERVOLT"},
+    {Parameters::k_param_pack_capacity, 0, AP_PARAM_INT32, "BATT_CAPACITY"},
+    {Parameters::k_param_serial0_baud, 0, AP_PARAM_INT16, "SERIAL0_BAUD"},
+    {Parameters::k_param_serial1_baud, 0, AP_PARAM_INT16, "SERIAL1_BAUD"},
+    {Parameters::k_param_serial2_baud, 0, AP_PARAM_INT16, "SERIAL2_BAUD"},
+    {Parameters::k_param_throttle_min_old, 0, AP_PARAM_INT8, "MOT_THR_MIN"},
+    {Parameters::k_param_throttle_max_old, 0, AP_PARAM_INT8, "MOT_THR_MAX"},
+    {Parameters::k_param_compass_enabled_deprecated, 0, AP_PARAM_INT8, "COMPASS_ENABLE"},
+    {Parameters::k_param_pivot_turn_angle_old, 0, AP_PARAM_INT16, "WP_PIVOT_ANGLE"},
+    {Parameters::k_param_waypoint_radius_old, 0, AP_PARAM_FLOAT, "WP_RADIUS"},
+    {Parameters::k_param_waypoint_overshoot_old, 0, AP_PARAM_FLOAT, "WP_OVERSHOOT"},
+    {Parameters::k_param_g2, 20, AP_PARAM_INT16, "WP_PIVOT_RATE"},
 
-    { Parameters::k_param_g2,                32,      AP_PARAM_FLOAT,  "SAIL_ANGLE_MIN" },
-    { Parameters::k_param_g2,                33,      AP_PARAM_FLOAT,  "SAIL_ANGLE_MAX" },
-    { Parameters::k_param_g2,                34,      AP_PARAM_FLOAT,  "SAIL_ANGLE_IDEAL" },
-    { Parameters::k_param_g2,                35,      AP_PARAM_FLOAT,  "SAIL_HEEL_MAX" },
-    { Parameters::k_param_g2,                36,      AP_PARAM_FLOAT,  "SAIL_NO_GO_ANGLE" },
-    { Parameters::k_param_arming,             2,     AP_PARAM_INT16,  "ARMING_CHECK" },
-    { Parameters::k_param_turn_max_g_old,     0,     AP_PARAM_FLOAT,  "ATC_TURN_MAX_G" },
+    {Parameters::k_param_g2, 32, AP_PARAM_FLOAT, "SAIL_ANGLE_MIN"},
+    {Parameters::k_param_g2, 33, AP_PARAM_FLOAT, "SAIL_ANGLE_MAX"},
+    {Parameters::k_param_g2, 34, AP_PARAM_FLOAT, "SAIL_ANGLE_IDEAL"},
+    {Parameters::k_param_g2, 35, AP_PARAM_FLOAT, "SAIL_HEEL_MAX"},
+    {Parameters::k_param_g2, 36, AP_PARAM_FLOAT, "SAIL_NO_GO_ANGLE"},
+    {Parameters::k_param_arming, 2, AP_PARAM_INT16, "ARMING_CHECK"},
+    {Parameters::k_param_turn_max_g_old, 0, AP_PARAM_FLOAT, "ATC_TURN_MAX_G"},
 };
 
 void Rover::load_parameters(void)
@@ -764,7 +801,7 @@ void Rover::load_parameters(void)
     }
 
     if (!g.format_version.load() ||
-         g.format_version != Parameters::k_format_version) {
+        g.format_version != Parameters::k_format_version) {
         // erase all parameters
         hal.console->printf("Firmware change: erasing EEPROM...\n");
         StorageManager::erase();
@@ -795,11 +832,14 @@ void Rover::load_parameters(void)
     // set a more reasonable default NAVL1_PERIOD for rovers
     L1_controller.set_default_period(NAVL1_PERIOD);
 
+    ILOS_controller.set_default_kp(NAVILOS_KP);
+    ILOS_controller.set_default_ki(NAVILOS_KI);
+
     // convert CH7_OPTION to RC7_OPTION for Rover-3.4 to 3.5 upgrade
-    const AP_Param::ConversionInfo ch7_option_info = { Parameters::k_param_ch7_option, 0, AP_PARAM_INT8, "RC7_OPTION" };
+    const AP_Param::ConversionInfo ch7_option_info = {Parameters::k_param_ch7_option, 0, AP_PARAM_INT8, "RC7_OPTION"};
     AP_Int8 ch7_opt_old;
     if (AP_Param::find_old_parameter(&ch7_option_info, &ch7_opt_old)) {
-        const uint8_t ch7_opt_map[] = {0,7,50,41,51,52,53,54,16,4,42,55,56};
+        const uint8_t ch7_opt_map[] = {0, 7, 50, 41, 51, 52, 53, 54, 16, 4, 42, 55, 56};
         const uint8_t ch7_opt_old_val = (uint8_t)ch7_opt_old.get();
         if (ch7_opt_old_val < ARRAY_SIZE(ch7_opt_map)) {
             AP_Param::set_default_by_name(ch7_option_info.new_name, ch7_opt_map[ch7_opt_old_val]);
@@ -807,8 +847,8 @@ void Rover::load_parameters(void)
     }
 
     // set AR_WPNav's WP_SPEED to be old WP_SPEED (if set) or CRUISE_SPEED (if set)
-    const AP_Param::ConversionInfo wp_speed_old_info = { Parameters::k_param_g2, 14, AP_PARAM_FLOAT, "WP_SPEED" };
-    const AP_Param::ConversionInfo cruise_speed_info = { Parameters::k_param_speed_cruise, 0, AP_PARAM_FLOAT, "WP_SPEED" };
+    const AP_Param::ConversionInfo wp_speed_old_info = {Parameters::k_param_g2, 14, AP_PARAM_FLOAT, "WP_SPEED"};
+    const AP_Param::ConversionInfo cruise_speed_info = {Parameters::k_param_speed_cruise, 0, AP_PARAM_FLOAT, "WP_SPEED"};
     AP_Float wp_speed_old;
     if (AP_Param::find_old_parameter(&wp_speed_old_info, &wp_speed_old)) {
         // old WP_SPEED parameter value was set so copy to new WP_SPEED
@@ -820,28 +860,28 @@ void Rover::load_parameters(void)
 
     // attitude control FF and FILT parameter changes for Rover-3.6
     const AP_Param::ConversionInfo ff_and_filt_conversion_info[] = {
-        { Parameters::k_param_g2, 24650, AP_PARAM_FLOAT, "ATC_STR_RAT_FLTE" },
-        { Parameters::k_param_g2, 28746, AP_PARAM_FLOAT, "ATC_STR_RAT_FF" },
-        { Parameters::k_param_g2, 24714, AP_PARAM_FLOAT, "ATC_SPEED_FLTE" },
-        { Parameters::k_param_g2, 28810, AP_PARAM_FLOAT, "ATC_SPEED_FF" },
-        { Parameters::k_param_g2, 25226, AP_PARAM_FLOAT, "ATC_BAL_FLTE" },
-        { Parameters::k_param_g2, 29322, AP_PARAM_FLOAT, "ATC_BAL_FF" },
-        { Parameters::k_param_g2, 25354, AP_PARAM_FLOAT, "ATC_SAIL_FLTE" },
-        { Parameters::k_param_g2, 29450, AP_PARAM_FLOAT, "ATC_SAIL_FF" },
+        {Parameters::k_param_g2, 24650, AP_PARAM_FLOAT, "ATC_STR_RAT_FLTE"},
+        {Parameters::k_param_g2, 28746, AP_PARAM_FLOAT, "ATC_STR_RAT_FF"},
+        {Parameters::k_param_g2, 24714, AP_PARAM_FLOAT, "ATC_SPEED_FLTE"},
+        {Parameters::k_param_g2, 28810, AP_PARAM_FLOAT, "ATC_SPEED_FF"},
+        {Parameters::k_param_g2, 25226, AP_PARAM_FLOAT, "ATC_BAL_FLTE"},
+        {Parameters::k_param_g2, 29322, AP_PARAM_FLOAT, "ATC_BAL_FF"},
+        {Parameters::k_param_g2, 25354, AP_PARAM_FLOAT, "ATC_SAIL_FLTE"},
+        {Parameters::k_param_g2, 29450, AP_PARAM_FLOAT, "ATC_SAIL_FF"},
     };
     uint8_t filt_table_size = ARRAY_SIZE(ff_and_filt_conversion_info);
-    for (uint8_t i=0; i<filt_table_size; i++) {
+    for (uint8_t i = 0; i < filt_table_size; i++) {
         AP_Param::convert_old_parameters(&ff_and_filt_conversion_info[i], 1.0f);
     }
 
     // configure safety switch to allow stopping the motors while armed
 #if HAL_HAVE_SAFETY_SWITCH
-    AP_Param::set_default_by_name("BRD_SAFETYOPTION", AP_BoardConfig::BOARD_SAFETY_OPTION_BUTTON_ACTIVE_SAFETY_OFF|
-                                                      AP_BoardConfig::BOARD_SAFETY_OPTION_BUTTON_ACTIVE_SAFETY_ON|
-                                                      AP_BoardConfig::BOARD_SAFETY_OPTION_BUTTON_ACTIVE_ARMED);
+    AP_Param::set_default_by_name("BRD_SAFETYOPTION", AP_BoardConfig::BOARD_SAFETY_OPTION_BUTTON_ACTIVE_SAFETY_OFF |
+                                  AP_BoardConfig::BOARD_SAFETY_OPTION_BUTTON_ACTIVE_SAFETY_ON |
+                                  AP_BoardConfig::BOARD_SAFETY_OPTION_BUTTON_ACTIVE_ARMED);
 #endif
 
-// PARAMETER_CONVERSION - Added: JAN-2022
+    // PARAMETER_CONVERSION - Added: JAN-2022
 #if AP_AIRSPEED_ENABLED
     // Find G2's Top Level Key
     AP_Param::ConversionInfo info;
@@ -849,8 +889,8 @@ void Rover::load_parameters(void)
         return;
     }
 
-    const uint16_t old_index = 37;          // Old parameter index in the tree
-    const uint16_t old_top_element = 4069;  // Old group element in the tree for the first subgroup element
+    const uint16_t old_index = 37;         // Old parameter index in the tree
+    const uint16_t old_top_element = 4069; // Old group element in the tree for the first subgroup element
     AP_Param::convert_class(info.old_key, &airspeed, airspeed.var_info, old_index, old_top_element, false);
 #endif
 }

@@ -7,11 +7,11 @@
  */
 
 #ifndef EKF_CHECK_ITERATIONS_MAX
- # define EKF_CHECK_ITERATIONS_MAX          10      // 1 second (ie. 10 iterations at 10hz) of bad variances signals a failure
+# define EKF_CHECK_ITERATIONS_MAX          10      // 1 second (ie. 10 iterations at 10hz) of bad variances signals a failure
 #endif
 
 #ifndef EKF_CHECK_WARNING_TIME
- # define EKF_CHECK_WARNING_TIME            (30*1000)   // warning text messages are sent to ground no more than every 30 seconds
+# define EKF_CHECK_WARNING_TIME            (30*1000)   // warning text messages are sent to ground no more than every 30 seconds
 #endif
 
 
@@ -156,15 +156,15 @@ void Rover::failsafe_ekf_event()
 
     // take action based on fs_ekf_action parameter
     switch ((enum fs_ekf_action)g.fs_ekf_action.get()) {
-        case FS_EKF_DISABLE:
-            // do nothing
-            return;
-        case FS_EKF_REPORT_ONLY:
-            break;
-        case FS_EKF_HOLD:
-        default:
-            set_mode(mode_hold, ModeReason::EKF_FAILSAFE);
-            break;
+    case FS_EKF_DISABLE:
+        // do nothing
+        return;
+    case FS_EKF_REPORT_ONLY:
+        break;
+    case FS_EKF_HOLD:
+    default:
+        set_mode(mode_hold, ModeReason::EKF_FAILSAFE);
+        break;
     }
 
     gcs().send_text(MAV_SEVERITY_CRITICAL,"EKF failsafe");

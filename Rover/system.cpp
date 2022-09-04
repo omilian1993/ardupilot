@@ -167,7 +167,7 @@ void Rover::startup_ground(void)
 #if LOGGING_ENABLED == ENABLED
     logger.setVehicle_Startup_Writer(
         FUNCTOR_BIND(&rover, &Rover::Log_Write_Vehicle_Startup_Messages, void)
-        );
+    );
 #endif
 
 #if AP_SCRIPTING_ENABLED
@@ -311,5 +311,8 @@ bool Rover::is_boat() const
 #include <AP_ADSB/AP_ADSB.h>
 #if HAL_ADSB_ENABLED
 // dummy method to avoid linking AP_Avoidance
-AP_Avoidance *AP::ap_avoidance() { return nullptr; }
+AP_Avoidance *AP::ap_avoidance()
+{
+    return nullptr;
+}
 #endif

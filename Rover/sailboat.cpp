@@ -198,15 +198,15 @@ void Sailboat::get_throttle_and_mainsail_out(float desired_speed, float &throttl
 
     // run speed controller if motor is forced on or motor assistance is required for low speeds or tacking
     if ((motor_state == UseMotor::USE_MOTOR_ALWAYS) ||
-         motor_assist_tack() ||
-         motor_assist_low_wind()) {
+        motor_assist_tack() ||
+        motor_assist_low_wind()) {
         // run speed controller - duplicate of calls found in mode::calc_throttle();
         throttle_out = 100.0f * rover.g2.attitude_control.get_throttle_out_speed(desired_speed,
-                                                                        rover.g2.motors.limit.throttle_lower,
-                                                                        rover.g2.motors.limit.throttle_upper,
-                                                                        rover.g.speed_cruise,
-                                                                        rover.g.throttle_cruise * 0.01f,
-                                                                        rover.G_Dt);
+                       rover.g2.motors.limit.throttle_lower,
+                       rover.g2.motors.limit.throttle_upper,
+                       rover.g.speed_cruise,
+                       rover.g.throttle_cruise * 0.01f,
+                       rover.G_Dt);
     } else {
         throttle_out = 0.0f;
     }
@@ -246,7 +246,7 @@ void Sailboat::get_throttle_and_mainsail_out(float desired_speed, float &throttl
         // linear interpolate mainsail value (0 to 100) from wind angle mainsail_angle
         float mainsail_base = linear_interpolate(0.0f, 100.0f, mainsail_angle,sail_angle_min,sail_angle_max);
 
-        mainsail_out = constrain_float((mainsail_base + pid_offset), 0.0f ,100.0f);
+        mainsail_out = constrain_float((mainsail_base + pid_offset), 0.0f,100.0f);
     }
 
     //
@@ -345,7 +345,7 @@ void Sailboat::handle_tack_request_acro()
 float Sailboat::get_tack_heading_rad()
 {
     if (fabsf(wrap_PI(tack_heading_rad - rover.ahrs.yaw)) < radians(SAILBOAT_TACKING_ACCURACY_DEG) ||
-       ((AP_HAL::millis() - tack_request_ms) > SAILBOAT_AUTO_TACKING_TIMEOUT_MS)) {
+        ((AP_HAL::millis() - tack_request_ms) > SAILBOAT_AUTO_TACKING_TIMEOUT_MS)) {
         clear_tack();
     }
 
@@ -476,12 +476,12 @@ float Sailboat::calc_heading(float desired_heading_cd)
         gcs().send_text(MAV_SEVERITY_INFO, "Sailboat: Tacking");
         // calculate target heading for the new tack
         switch (current_tack) {
-            case AP_WindVane::Sailboat_Tack::TACK_PORT:
-                tack_heading_rad = right_no_go_heading_rad;
-                break;
-            case AP_WindVane::Sailboat_Tack::TACK_STARBOARD:
-                tack_heading_rad = left_no_go_heading_rad;
-                break;
+        case AP_WindVane::Sailboat_Tack::TACK_PORT:
+            tack_heading_rad = right_no_go_heading_rad;
+            break;
+        case AP_WindVane::Sailboat_Tack::TACK_STARBOARD:
+            tack_heading_rad = left_no_go_heading_rad;
+            break;
         }
         currently_tacking = true;
         auto_tack_start_ms = now;

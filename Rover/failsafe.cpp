@@ -109,37 +109,37 @@ void Rover::failsafe_trigger(uint8_t failsafe_type, const char* type_str, bool o
 
 void Rover::handle_battery_failsafe(const char* type_str, const int8_t action)
 {
-        switch ((Failsafe_Action)action) {
-            case Failsafe_Action_None:
-                break;
-            case Failsafe_Action_SmartRTL:
-                if (set_mode(mode_smartrtl, ModeReason::BATTERY_FAILSAFE)) {
-                    break;
-                }
-                FALLTHROUGH;
-            case Failsafe_Action_RTL:
-                if (set_mode(mode_rtl, ModeReason::BATTERY_FAILSAFE)) {
-                    break;
-                }
-                FALLTHROUGH;
-            case Failsafe_Action_Hold:
-                set_mode(mode_hold, ModeReason::BATTERY_FAILSAFE);
-                break;
-            case Failsafe_Action_SmartRTL_Hold:
-                if (!set_mode(mode_smartrtl, ModeReason::BATTERY_FAILSAFE)) {
-                    set_mode(mode_hold, ModeReason::BATTERY_FAILSAFE);
-                }
-                break;
-            case Failsafe_Action_Terminate:
-#if ADVANCED_FAILSAFE == ENABLED
-                char battery_type_str[17];
-                snprintf(battery_type_str, 17, "%s battery", type_str);
-                g2.afs.gcs_terminate(true, battery_type_str);
-#else
-                arming.disarm(AP_Arming::Method::BATTERYFAILSAFE);
-#endif // ADVANCED_FAILSAFE == ENABLED
-                break;
+    switch ((Failsafe_Action)action) {
+    case Failsafe_Action_None:
+        break;
+    case Failsafe_Action_SmartRTL:
+        if (set_mode(mode_smartrtl, ModeReason::BATTERY_FAILSAFE)) {
+            break;
         }
+        FALLTHROUGH;
+    case Failsafe_Action_RTL:
+        if (set_mode(mode_rtl, ModeReason::BATTERY_FAILSAFE)) {
+            break;
+        }
+        FALLTHROUGH;
+    case Failsafe_Action_Hold:
+        set_mode(mode_hold, ModeReason::BATTERY_FAILSAFE);
+        break;
+    case Failsafe_Action_SmartRTL_Hold:
+        if (!set_mode(mode_smartrtl, ModeReason::BATTERY_FAILSAFE)) {
+            set_mode(mode_hold, ModeReason::BATTERY_FAILSAFE);
+        }
+        break;
+    case Failsafe_Action_Terminate:
+#if ADVANCED_FAILSAFE == ENABLED
+        char battery_type_str[17];
+        snprintf(battery_type_str, 17, "%s battery", type_str);
+        g2.afs.gcs_terminate(true, battery_type_str);
+#else
+        arming.disarm(AP_Arming::Method::BATTERYFAILSAFE);
+#endif // ADVANCED_FAILSAFE == ENABLED
+        break;
+    }
 }
 
 #if ADVANCED_FAILSAFE == ENABLED

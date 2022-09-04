@@ -9,7 +9,8 @@ void Rover::update_compass(void)
 }
 
 // Save compass offsets
-void Rover::compass_save() {
+void Rover::compass_save()
+{
     if (AP::compass().available() &&
         compass.get_learn_type() >= Compass::LEARN_INTERNAL &&
         !arming.is_armed()) {
@@ -80,10 +81,10 @@ void Rover::update_wheel_encoder()
      * posOffset is the XYZ body frame position of the wheel hub (m)
      */
     ahrs.EKF3.writeWheelOdom(delta_angle,
-                        delta_time,
-                        wheel_encoder_last_reading_ms[wheel_encoder_last_index_sent],
-                        g2.wheel_encoder.get_pos_offset(wheel_encoder_last_index_sent),
-                        g2.wheel_encoder.get_wheel_radius(wheel_encoder_last_index_sent));
+                             delta_time,
+                             wheel_encoder_last_reading_ms[wheel_encoder_last_index_sent],
+                             g2.wheel_encoder.get_pos_offset(wheel_encoder_last_index_sent),
+                             g2.wheel_encoder.get_wheel_radius(wheel_encoder_last_index_sent));
 #endif
 }
 

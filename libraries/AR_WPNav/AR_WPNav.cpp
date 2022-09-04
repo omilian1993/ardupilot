@@ -95,7 +95,7 @@ const AP_Param::GroupInfo AR_WPNav::var_info[] = {
     AP_GROUPEND
 };
 
-AR_WPNav::AR_WPNav(AR_AttitudeControl& atc, AP_Navigation& nav_controller) :
+AR_WPNav::AR_WPNav(AR_AttitudeControl& atc, AP_Navigation* nav_controller) :
     _atc(atc),
     _nav_controller(nav_controller)
 {
@@ -386,18 +386,18 @@ void AR_WPNav::update_steering(const Location& current_loc, float current_speed)
         // update flag so that it can be cleared
         update_pivot_active_flag();
     } else {
-        // run L1 controller
-        _nav_controller.set_reverse(_reversed);
-        _nav_controller.update_waypoint(_reached_destination ? current_loc : _oa_origin, _oa_destination, _radius);
+        // run L1 controller or custom navigation controller 
+        _nav_controller->set_reverse(_reversed);
+        _nav_controller->update_waypoint(_reached_destination ? current_loc : _oa_origin, _oa_destination, _radius);
 
         // retrieve lateral acceleration, heading back towards line and crosstrack error
-        _desired_lat_accel = constrain_float(_nav_controller.lateral_acceleration(), -_atc.get_turn_lat_accel_max(), _atc.get_turn_lat_accel_max());
-        _desired_heading_cd = wrap_360_cd(_nav_controller.nav_bearing_cd());
+        _desired_lat_accel = constrain_float(_nav_controller->lateral_acceleration(), -_atc.get_turn_lat_accel_max(), _atc.get_turn_lat_accel_max());
+        _desired_heading_cd = wrap_360_cd(_nav_controller->nav_bearing_cd());
         if (_reversed) {
             _desired_lat_accel *= -1.0f;
             _desired_heading_cd = wrap_360_cd(_desired_heading_cd + 18000);
         }
-        _cross_track_error = _nav_controller.crosstrack_error();
+        _cross_track_error = _nav_controller->crosstrack_error();
         _desired_turn_rate_rads = _atc.get_turn_rate_from_lat_accel(_desired_lat_accel, current_speed);
     }
 }
